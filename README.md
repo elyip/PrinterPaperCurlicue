@@ -1,0 +1,2 @@
+# PrinterPaperCurlicue
+The crease pattern of a curlicue consists of cells of decreasing sizes.  We divide the curlicue into shorter curlicues along the cell boundaries.  Each shorter curlicue is shorter than the length of the paper, and the narrow end of one is the wide end of the next one.  This program generates the crease pattern of your curlicue in PDF format. A previw of the PDF file is displayed.  Note that we only color the parts that show.
