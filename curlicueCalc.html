@@ -1,0 +1,135 @@
+<!doctype>
+<html>
+<head>
+    <title>Cutting Paper for Curlicue</title>
+
+
+
+</head>
+<style>
+  .center{
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%
+   }
+</style>
+<style>
+  .center1{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%
+   }
+</style>
+<div class="center">     
+<h1>
+Cutting Paper for Curlicue</h1>
+
+<img border="0" src="white.svg" alt="Printer Papaer Curlicue" 
+width="300",height="228" >
+</div>
+<br><br>
+<a href="index.html">Home</a>
+<body><FORM class="center1" NAME="Curli" ACTION="" METHOD="GET">Your Curlicue data in
+cm:
+<p>
+Length::<INPUT TYPE="text" NAME="L" VALUE="140.0">
+Wide end:<INPUT TYPE="text" NAME="w" VALUE="3">
+Narrow end:<INPUT TYPE="text" NAME="z" VALUE="0.5"><P>
+Paper Width:<INPUT TYPE="text" NAME="pl" VALUE="27.9">
+
+<INPUT TYPE="button" NAME="button" Value="Compute Cuts" onClick="cCut(this.form)">
+</FORM>    
+<div id="Results" class="center" >Results</div> 
+
+
+
+<script type="text/javascript">
+
+cCut(document.forms[0]);
+function findlasti(w,t,z){
+    var r = t*t;
+    var fi = Math.log(z/w)/Math.log(r) + 10.E-10;
+    return Math.floor(fi);
+    };    
+function findLi (w, t, L){
+    var r = t*t;
+    var x = 1 - (L*(1-r)/(2*w*t)) ; // x = r^i
+
+    var fi = Math.log(x)/Math.log(r)+10.E-10;
+    return fi;
+    };
+function findlng(i,w,t){
+    var r = t*t;
+    var L=2*w*t*(1.- Math.pow(r,i))/(1-r);
+    return L;
+    }        ;
+function cue2str(L,w,z){
+    var L2=L.toFixed(3);
+    var w2=w.toFixed(3);
+    var z2=z.toFixed(3);
+    var cue="(" + L2 + ", " + w2 + ", " + z2 + " )" ;
+    return cue;}    
+function cCut(fm){
+	 
+    var ErrPlus = "Input Error: All the input numbers should be positive.  " ;
+    var Errwz	= "Length > Wide end > Narrow end.  "
+    var ErrMsg  = ErrPlus.concat(Errwz);
+
+    var L = Number(fm.L.value);  
+    var ww = Number(fm.w.value);
+    var z  = Number(fm.z.value);
+    var pl = Number(fm.pl.value);
+    var Ans = "Users Input: "+cue2str(L,ww,z);
+    document.getElementById("Results").innerHTML=(Ans);
+   
+    var checked =(Math.min(L,ww,z) >0)  && (L > ww) && (ww > z) ;
+    if (!checked){
+         alert(ErrMsg);
+         return;}
+	 
+    var b  = 0.5*Math.atan((L)/(ww-z));
+    var t  = Math.tan(b);
+    var r  = t*t
+    var LastI  = findlasti(ww,t,z);
+    var cueLng = findlng(LastI,ww,t);
+    var zz     = ww*Math.pow(r,LastI);
+    Ans = Ans + "<br />Computed :" + cue2str(cueLng,ww,zz);
+    document.getElementById("Results").innerHTML=(Ans);
+
+    var RtEdge = pl - 2.5;
+    var w  = ww;
+    var LeftOver = cueLng;
+    var l = 0;
+    var strip = 0;
+    while (LeftOver > 0){
+    strip = strip + 1;
+
+    if (LeftOver > RtEdge){
+      ll = Math.floor(findLi(w,t,RtEdge));}
+    else {
+      ll = Math.floor(findLi(w,t,LeftOver));}
+    lng=findlng(ll,w,t);
+    zz = w*Math.pow(r,ll);
+    Ans = Ans + "<br />Strip " + strip +" "+ cue2str(lng,w,zz); 
+    document.getElementById("Results").innerHTML=(Ans);   
+        
+    var t2m1=t;
+    var t2  =t*t;
+    var t2p1=t*t*t
+    
+    	 
+    var ltt = ll + l;
+    w = ww*Math.pow(r,ltt);
+    LeftOver = findlng(LastI-ltt,w,t);
+
+    l = ltt;
+     
+    } // while
+    
+    return;}
+</script>
+    <br><br>
+    <a href="index.html"><Home></a>
+
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!doctype>
+<html>
+<head> 
+<meta http-equiv="content="text/html; charset=ISO-8859-1">
+
+
+    <title>Printer Paper Curlicue</title>
+
+
+    <script type="text/javascript" src="js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="js/jspdf.debug.js"></script>
+    <script type="text/javascript" src="js/basic.js"></script>
+
+
+</head>
+<style>
+  .center{
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%
+   }
+   h3{margin-left: auto;
+    margin-right: auto;
+    width: 90%
+   }
+   form{margin-left: auto;
+    margin-right: auto;
+    width: 90%
+   }
+  .center1{
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%
+   }
+   
+</style>
+<div class="center">     
+<h1>
+Printer Paper Curlicue</h1>
+
+<img border="0" src="PPCurlicue.jpg" alt="Printer Papaer Curlicue" 
+width="300",height="228" >
+</div><BR><BR>
+
+<p class="center1">The crease pattern of a curlicue consists of cells of decreasing sizes(
+See <a href="curlicueMath.html">Curlicue Math</a>).  We
+divide the curlicue into shorter curlicues along the cell boundaries.  Each
+shorter curlicue is shorter than the length of the paper, and the narrow end of
+one is the wide end of the next one.  This program generates the
+crease pattern of your curlicue in PDF format. Note that we only color the parts that
+show.
+  
+</p>
+&nbsp &nbsp &nbsp &nbsp Select paper format:
+<select id="paper">
+  <option>letter</option>
+  <option>legal</option>
+  <option>a3</option>
+  <option >a4</option>
+  <option>a5</option>
+</select><BR><BR>
+
+<body><FORM NAME="Curli" ACTION="" METHOD="GET">Your Curlicue data in
+cm:
+<p>
+Length: <INPUT TYPE="text" NAME="L" VALUE="140.0">
+Wide end:<INPUT TYPE="text" NAME="w" VALUE="3">
+Narrow end: <INPUT TYPE="text" NAME="z" VALUE="0.5"><P>
+Click color button to pick color:<INPUT TYPE="color", NAME="color", VALUE="#ff0000"><P>
+<INPUT TYPE="button" NAME="button" Value="Generate PDF"
+onClick="genPDF(this.form,1)">
+</FORM>    
+<p class="center1">
+<a href="curlicueHowto.html"> How to assemble the strips. </a>&nbsp &nbsp &nbsp &nbsp
+<a href="curlicueCalc.html"> How to cut paper. </a>&nbsp &nbsp &nbsp &nbsp
+<a href="curlicueMath.html"> Curlicue Math </a>&nbsp &nbsp &nbsp &nbsp
+</p>
+<p class="center1">
+PDF Preview: </p>
+&nbsp &nbsp &nbsp &nbsp<iframe id="plugin" 
+type="application/x-google-chrome.pdf" > </iframe>
+
+
+<script type="text/javascript">
+
+function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
+function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
+function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
+function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+
+function findlasti(w,t,z){
+    var r = t*t;
+    var fi = Math.log(z/w)/Math.log(r) + 10.E-10;
+    return Math.floor(fi);
+    };    
+function findLi (w, t, L){
+    var r = t*t;
+    var x = 1 - (L*(1-r)/(2*w*t)) ; // x = r^i
+
+    var fi = Math.log(x)/Math.log(r)+10.E-10;
+    return fi;
+    };
+function findlng(i,w,t){
+    var r = t*t;
+    var L=2*w*t*(1.- Math.pow(r,i))/(1-r);
+    return L;
+    }        ;
+
+genPDF(document.forms[0],0);   
+function genPDF(fm,istart){
+    var format=document.getElementById("paper").value;
+    switch(format){
+       case "letter":
+         pw = 216;
+	 pl = 279;
+	 break;
+       case "legal":
+         pw = 216;
+	 pl = 359;
+	 break;
+       case "a3":
+         pw = 297;
+	 pl = 420;
+	 break;
+       case "a4":
+         pw = 210;
+	 pl = 297;
+	 break;
+       case "a5":
+         pw = 148;
+	 pl = 210;
+	 break;}
+    var ErrPlus = "Input Error: All the input numbers should be positive.  " ;
+    var Errwz	= "Length > Wide end > Narrow end.  "
+    var Errtw   = "Wide end < paper width. "
+    var ErrMsg  = ErrPlus.concat(Errwz).concat(Errtw);
+    //convert to mm 
+    var L = Number(fm.L.value)*10;  
+    var ww = Number(fm.w.value)*10;
+    var z  = Number(fm.z.value)*10;
+    var hx = fm.color.value;
+    var R = hexToR(hx);
+    var G = hexToG(hx);
+    var B = hexToB(hx);
+    var checked =(Math.min(L,ww,z) >0)  && (L > ww) && (ww > z) && (ww < pw);
+    if (!checked){
+         alert(ErrMsg);
+         return;}
+	 
+    var b  = 0.5*Math.atan((L)/(ww-z));
+    var t  = Math.tan(b);
+    var r  = t*t
+    var LastI  = findlasti(ww,t,z);
+    var cueLng = findlng(LastI,ww,t);
+
+    var RtEdge = pl - 25;
+    var BmEdge = pw - 15;
+    var ox =20;
+    var oy =10;     
+    var w  = ww;
+    var LeftOver = cueLng;
+    var l = 0;
+    var doc = new jsPDF('landscape','mm',format);
+    doc.setFillColor(R,G,B);	    
+
+    while (LeftOver > 0){
+
+    var A0x =	     ox;
+    var A0y = w    + oy;
+    var B0x =	     ox;
+    var B0y =	     oy;
+    var Cix = w*t  + ox;
+    var Ciy = w    + oy;
+    doc.triangle(A0x,A0y,B0x,B0y,Cix,Ciy, 'FD');
+    if (LeftOver > RtEdge){
+      ll = Math.floor(findLi(w,t,RtEdge));}
+    else {
+      ll = Math.floor(findLi(w,t,LeftOver));}  
+    var t2m1=t;
+    var t2  =t*t;
+    var t2p1=t*t*t
+    for (i=1; i<= ll  ;i++){
+       var Cm1x=Cix;
+       var Cm1y=Ciy;
+    	       
+       var Aix = Cm1x + w*t2m1   ;
+       var Aiy = w			       + oy;
+       var Bix = Aix			       ;
+       var Biy = w    - w*t2                   + oy;
+       var Cix = Aix  + w*t2p1    ;
+       var Ciy = w			       + oy;
+       t2m1 = t2m1*r;
+       t2   = t2  *r;
+       t2p1 = t2p1*r;
+       if(i < ll) {
+    	 doc.line(Cm1x,Cm1y,Bix,Biy);
+    	 doc.line(Cm1x,Cm1y,Aix,Aiy);
+    	 doc.triangle(Aix,Aiy,Bix,Biy,Cix,Ciy,'FD');}
+       else {	
+    	 doc.triangle(Cm1x,Cm1y,Bix,Biy,Aix,Aiy);} }
+    	 
+    var ltt = ll + l;
+    w = ww*Math.pow(r,ltt);
+    LeftOver = findlng(LastI-ltt,w,t);
+    doc.line(B0x,B0y,Bix,Biy);
+    l = ltt;
+    if (Aiy+w < BmEdge){
+      oy = Aiy;}
+    else {
+      doc.addPage();
+      doc.setFillColor(R,G,B);
+      oy = 10;}
+    if (LeftOver > 0){  
+    doc.rect(10,oy,10,w);
+    doc.line(10,oy+Math.min(10,w)*t,20,oy);} }
+//    doc.output('dataurlnewwindow');
+    var pdfout = doc.output('datauristring');
+    document.getElementById("plugin").src=pdfout;
+    if (istart > 0){
+    var fname = prompt ("Save as:");
+    if (fname !=null){
+      doc.save(fname);}};
+
+    return;}
+</script>
+
+
+</body>
+</html>
