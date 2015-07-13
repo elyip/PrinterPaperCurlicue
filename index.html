@@ -68,8 +68,10 @@ Length: <INPUT TYPE="text" NAME="L" VALUE="140.0">
 Wide end:<INPUT TYPE="text" NAME="w" VALUE="3">
 Narrow end: <INPUT TYPE="text" NAME="z" VALUE="0.5"><P>
 Click color button to pick color:<INPUT TYPE="color", NAME="color", VALUE="#ff0000"><P>
-<INPUT TYPE="button" NAME="button" Value="Generate PDF"
-onClick="genPDF(this.form,1)">
+<INPUT TYPE="button" NAME="button" Value="Generate color PDF"
+onClick="genPDF(this.form,1,0)">
+<INPUT TYPE="button" NAME="button" Value="Generate B&W PDF"
+onClick="genPDF(this.form,1,1)">
 </FORM>    
 <p class="center1">
 <a href="curlicueHowto.html"> How to assemble the strips. </a>&nbsp &nbsp &nbsp &nbsp
@@ -107,8 +109,8 @@ function findlng(i,w,t){
     return L;
     }        ;
 
-genPDF(document.forms[0],0);   
-function genPDF(fm,istart){
+genPDF(document.forms[0],0,0);   
+function genPDF(fm,istart,BW){
     var format=document.getElementById("paper").value;
     switch(format){
        case "letter":
@@ -172,7 +174,10 @@ function genPDF(fm,istart){
     var B0y =	     oy;
     var Cix = w*t  + ox;
     var Ciy = w    + oy;
-    doc.triangle(A0x,A0y,B0x,B0y,Cix,Ciy, 'FD');
+    if (BW == 1){
+      doc.triangle(A0x,A0y,B0x,B0y,Cix,Ciy);}
+    else {  
+      doc.triangle(A0x,A0y,B0x,B0y,Cix,Ciy, 'FD');}
     if (LeftOver > RtEdge){
       ll = Math.floor(findLi(w,t,RtEdge));}
     else {
@@ -196,7 +201,11 @@ function genPDF(fm,istart){
        if(i < ll) {
     	 doc.line(Cm1x,Cm1y,Bix,Biy);
     	 doc.line(Cm1x,Cm1y,Aix,Aiy);
-    	 doc.triangle(Aix,Aiy,Bix,Biy,Cix,Ciy,'FD');}
+	 if (BW==1){
+    	 doc.triangle(Aix,Aiy,Bix,Biy,Cix,Ciy);}
+	 else{
+	 doc.triangle(Aix,Aiy,Bix,Biy,Cix,Ciy,'FD');}
+	 }
        else {	
     	 doc.triangle(Cm1x,Cm1y,Bix,Biy,Aix,Aiy);} }
     	 
